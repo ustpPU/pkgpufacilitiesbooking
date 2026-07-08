@@ -9,6 +9,7 @@
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/fYY58Rh2/JATA-NEGARA-PNG.png">
     
+    <!-- Enjin Tailwind v4 Rasmi & Stabil -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -89,6 +90,7 @@
 </head>
 <body>
 
+    <!-- SPINNER SKRIN MULA -->
     <div id="landing-page-spinner" class="fixed inset-0 bg-slate-950 z-[9999] flex flex-col items-center justify-center p-4 transition-all duration-500">
         <div class="animate-spin rounded-full h-14 w-14 border-4 border-slate-800 border-t-amber-500 shrink-0"></div>
         <h3 class="text-white font-semibold text-base sm:text-lg mt-6 tracking-wide text-center px-4 leading-relaxed">
@@ -99,6 +101,7 @@
         </p>
     </div>
 
+    <!-- OVERLAY PROSES -->
     <div id="loading-overlay" class="hidden fixed inset-0 bg-slate-950/80 z-[200] flex flex-col items-center justify-center">
         <div class="loader mb-4"></div>
         <p class="font-bold text-amber-500 animate-pulse">Sedang memproses tempahan...</p>
@@ -106,6 +109,7 @@
 
     <div id="overlay" class="hidden fixed inset-0 bg-black/60 z-[100] backdrop-blur-sm" onclick="closeSheet()"></div>
 
+    <!-- SIDE SHEET SENARAI TEMPAHAN AKTIF -->
     <div id="side-sheet" class="fixed top-0 right-0 h-full w-full max-w-lg z-[110] p-6 sm:p-8 overflow-y-auto">
         <div class="flex justify-between items-center mb-8">
             <div>
@@ -117,6 +121,7 @@
         <div id="sheet-content" class="space-y-4"></div>
     </div>
 
+    <!-- NAVBAR PREMIUM -->
     <nav class="sticky top-0 z-[50] bg-slate-950/80 backdrop-blur-lg border-b border-white/[0.04] py-4 px-4 sm:px-8 flex justify-between items-center gap-2 shadow-2xl">
         <div class="flex items-center gap-2 sm:gap-3 cursor-pointer shrink-0" onclick="showLanding()">
             <div class="w-9 h-9 sm:w-11 sm:h-11 bg-white rounded-xl flex items-center justify-center p-1 sm:p-1.5 shadow-md shrink-0">
@@ -129,8 +134,10 @@
         <button id="btn-toggle-view" onclick="showCheck()" class="bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 text-[10px] sm:text-xs font-black px-4 py-2 sm:px-6 sm:py-3 rounded-xl sm:rounded-2xl shadow-xl hover:brightness-110 transition-all shrink-0 uppercase tracking-wider">Semak Tempahan</button>
     </nav>
 
+    <!-- KANDUNGAN UTAMA -->
     <main class="max-w-6xl mx-auto p-4 sm:p-8 pb-24">
         
+        <!-- SEKSYEN UTAMA: PEMILIHAN FASILITI -->
         <section id="sec-landing" class="space-y-8 sm:space-y-12 flex flex-col fade-menu show">
             <div class="max-w-xl">
                 <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight uppercase tracking-tight">
@@ -143,6 +150,7 @@
             <div id="gallery-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 w-full"></div>
         </section>
 
+        <!-- SEKSYEN HUB STATUS & AKAN DATANG -->
         <section id="sec-check" class="hidden space-y-8 sm:space-y-12 flex flex-col">
             <div class="max-w-xl">
                 <h2 class="text-2xl sm:text-4xl font-extrabold text-white leading-tight uppercase tracking-tight">
@@ -155,9 +163,11 @@
             <div id="hub-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 w-full"></div>
         </section>
 
+        <!-- SEKSYEN BORANG TEMPAHAN -->
         <section id="sec-form" class="hidden max-w-5xl mx-auto px-1 sm:px-0">
             <div class="bg-slate-900 rounded-[2rem] sm:rounded-[3rem] shadow-2xl border border-white/5 overflow-hidden flex flex-col lg:flex-row">
                 
+                <!-- Borang Bahagian Kiri -->
                 <div class="p-6 sm:p-8 lg:p-10 lg:w-1/2 space-y-6">
                     <button onclick="showLanding()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-md transition-all">
                         ✕ Tutup Borang
@@ -184,6 +194,7 @@
                     </div>
                 </div>
                 
+                <!-- Jadual Slot Bahagian Kanan -->
                 <div class="bg-slate-950 p-6 sm:p-8 lg:p-10 lg:w-1/2 border-t lg:border-t-0 lg:border-l border-white/5 flex flex-col justify-between gap-6">
                     <div>
                         <p class="font-bold text-slate-300 mb-4 text-sm sm:text-base">Pilih Tarikh & Slot Masa:</p>
@@ -217,7 +228,6 @@
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbypvTwKQ0rnxALeKSrEjkMAbYpAQyy0zDdo732UtdK56YsIcnAwPzHOCx5NDCzoERND9A/exec";
         let appData = {}, allBookings = [], userSelections = {};
 
-        // ✨ PENAMBAHAN EJEN PEMBACA TARIKH UTK MENYOKONG DD/MM/YYYY DARI GAS SECARA TEPAT
         function parsingTarikhGAS(rawVal) {
             if (!rawVal) return null;
             let str = String(rawVal).trim();
@@ -322,7 +332,8 @@
             container.innerHTML = appData.fasilitiList.map(f => {
                 const semuaUpcoming = typeof allBookings !== 'undefined' && allBookings
                     ? allBookings.filter(b => {
-                        if (b.Fasiliti !== f.nama) return false;
+                        // ✨ PERBAIKAN LOGIK: Sokong kes-sensitif (Huruf besar/kecil dari Google Sheet)
+                        if (!b.Fasiliti || !f.nama || b.Fasiliti.toString().trim().toLowerCase() !== f.nama.toString().trim().toLowerCase()) return false;
                         let tTempah = parsingTarikhGAS(b.Tarikh_Mula);
                         return tTempah && tTempah >= hariIni;
                     }).sort((a, b) => {
@@ -450,7 +461,11 @@
                         let tObj = parsingTarikhGAS(b.Tarikh_Mula);
                         if (!tObj) return false;
                         let checkDate = tObj.toLocaleDateString('ms-MY', {day:'2-digit', month:'2-digit', year:'numeric'});
-                        return b.Fasiliti === namaFasilitiSemasa && checkDate === formattedDateForCheck && b.Slot === s;
+                        
+                        // ✨ PERBAIKAN LOGIK: Abaikan case-sensitivity huruf besar/kecil di matrik jadual
+                        let namaSheet = b.Fasiliti ? b.Fasiliti.toString().trim().toLowerCase() : "";
+                        let namaSistem = namaFasilitiSemasa ? namaFasilitiSemasa.toString().trim().toLowerCase() : "";
+                        return namaSheet === namaSistem && checkDate === formattedDateForCheck && b.Slot === s;
                     });
 
                     if (isAlreadyBooked) {
@@ -586,7 +601,8 @@
             
             const hariIni = new Date(); hariIni.setHours(0, 0, 0, 0);
             let list = allBookings.filter(b => {
-                if (b.Fasiliti !== namaBilik) return false;
+                // ✨ PERBAIKAN LOGIK: Abaikan kes huruf besar/kecil masa buka side-sheet
+                if (!b.Fasiliti || !namaBilik || b.Fasiliti.toString().trim().toLowerCase() !== namaBilik.toString().trim().toLowerCase()) return false;
                 let tTempah = parsingTarikhGAS(b.Tarikh_Mula);
                 return tTempah && tTempah >= hariIni;
             });
@@ -608,7 +624,7 @@
                 return new Date(pA) - new Date(pB);
             });
 
-            content.innerHTML = finalList.length ? finalList.map(b => {
+            content.innerHTML = finalList.length ? finalList.length ? finalList.map(b => {
                 return `
                 <div class="group bg-slate-900/60 p-4 sm:p-5 rounded-2xl text-left border border-white/5 shadow-sm hover:border-amber-500/40 transition-all cursor-pointer" onclick="this.classList.toggle('item-active')">
                     <div class="flex justify-between items-start gap-2">
@@ -625,7 +641,7 @@
                         <p><strong>🏛️ Organisasi:</strong> ${b.Organisasi}</p>
                     </div>
                 </div>`;
-            }).join('') : `<p class="py-20 text-center text-slate-500 italic text-xs">Tiada rekod tempahan aktif dikesan.</p>`;
+            }).join('') : `<p class="py-20 text-center text-slate-500 italic text-xs">Tiada rekod tempahan aktif dikesan.</p>` : `<p class="py-20 text-center text-slate-500 italic text-xs">Tiada rekod tempahan aktif dikesan.</p>`;
             
             sheet.classList.add('open');
             document.getElementById('overlay').classList.remove('hidden');
@@ -635,6 +651,7 @@
         function closeSheet() { document.getElementById('side-sheet').classList.remove('open'); document.getElementById('overlay').classList.add('hidden'); }
     </script>
 
+    <!-- FOOTER JAM LIVE -->
     <footer class="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-slate-950/95 to-transparent py-2 px-4 text-center">
         <div class="max-w-6xl mx-auto flex flex-col items-center justify-center gap-y-0.5 font-medium tracking-wide">
             <p class="whitespace-nowrap text-[2.7vw] sm:text-[11px] text-slate-400">
