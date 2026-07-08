@@ -20,7 +20,6 @@
             color: #f1f5f9; 
             overflow-x: hidden; 
         }
-        /* ✨ UPGRADE: Kad Premium Mod Gelap (Glassmorphism) */
         .premium-card { 
             background: rgba(15, 23, 42, 0.65);
             backdrop-filter: blur(12px);
@@ -36,7 +35,6 @@
             box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.7); 
         }
         
-        /* 🌟 UPGRADE: Side Sheet Premium Gelap */
         #side-sheet { 
             transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
             transform: translateX(100%); 
@@ -67,7 +65,7 @@
             cursor: pointer;
             position: relative;
             z-index: 10;
-            filter: invert(1); /* Jadikan ikon kalendar putih dalam mod gelap */
+            filter: invert(1);
         }
 
         #side-sheet.open { transform: translateX(0); }
@@ -216,8 +214,31 @@
     </main>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxn3qd_DIqfjZ8T0mnLZn2vacDc4-2vimx2esUdKtfKxVvNu2ql_stXw1Img7DGwebuJQ/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz6DtrXrudCEd1VTBWe4uhhxVr5k9GX-CulkRij9w6PSSKFJFmALehVb3Bk8H5aEEuTdg/exec";
         let appData = {}, allBookings = [], userSelections = {};
+
+        // ✨ PENAMBAHAN EJEN PEMBACA TARIKH UTK MENYOKONG DD/MM/YYYY DARI GAS SECARA TEPAT
+        function parsingTarikhGAS(rawVal) {
+            if (!rawVal) return null;
+            let str = String(rawVal).trim();
+            if (str.includes('/')) {
+                let parts = str.split('/');
+                if (parts[2].length === 4) {
+                    return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]), 0, 0, 0, 0);
+                } else {
+                    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 0, 0, 0, 0);
+                }
+            }
+            if (str.includes('-')) {
+                let parts = str.split('T')[0].split('-');
+                return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 0, 0, 0, 0);
+            }
+            let dObj = new Date(str);
+            if (!isNaN(dObj.getTime())) {
+                return new Date(dObj.getFullYear(), dObj.getMonth(), dObj.getDate(), 0, 0, 0, 0);
+            }
+            return null;
+        }
 
         window.onload = async () => {
             try {
@@ -295,56 +316,24 @@
             const container = document.getElementById('hub-container');
             if (!container || !appData || !appData.fasilitiList) return;
 
-            const formatKeDDMM = (tRaw) => {
-                if (!tRaw) return "";
-                if (tRaw instanceof Date) return tRaw.toLocaleDateString('ms-MY', {day:'2-digit', month:'2-digit'});
-                let bersih = String(tRaw).split('T')[0];
-                if (bersih.includes('-')) { let p = bersih.split('-'); return `${p[2]}/${p[1]}`; }
-                if (bersih.includes('/')) { let p = bersih.split('/'); return p[2].length === 4 ? `${p[0]}/${p[1]}` : `${p[2]}/${p[1]}`; }
-                let tObj = new Date(bersih); 
-                return isNaN(tObj.getTime()) ? "" : tObj.toLocaleDateString('ms-MY', {day:'2-digit', month:'2-digit'});
-            };
-
             const kini = new Date();
-            const hariIni = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate());
+            const hariIni = new Date(kini.getFullYear(), kini.getMonth(), kini.getDate(), 0, 0, 0, 0);
 
             container.innerHTML = appData.fasilitiList.map(f => {
                 const semuaUpcoming = typeof allBookings !== 'undefined' && allBookings
                     ? allBookings.filter(b => {
                         if (b.Fasiliti !== f.nama) return false;
-                        let tRaw = b.Tarikh_Mula; let tTempah;
-                        if (tRaw instanceof Date) { tTempah = new Date(tRaw.getFullYear(), tRaw.getMonth(), tRaw.getDate()); } 
-                        else {
-                            let bersih = String(tRaw).split('T')[0];
-                            if (bersih.includes('-')) { let p = bersih.split('-'); tTempah = new Date(p[0], p[1] - 1, p[2]); } 
-                            else if (bersih.includes('/')) { let p = bersih.split('/'); tTempah = p[2].length === 4 ? new Date(p[2], p[1] - 1, p[0]) : new Date(p[0], p[1] - 1, p[2]); } 
-                            else { let tObj = new Date(bersih); tTempah = new Date(tObj.getFullYear(), tObj.getMonth(), tObj.getDate()); }
-                        }
-                        if (!tTempah || isNaN(tTempah.getTime())) return false;
-                        tTempah.setHours(0, 0, 0, 0);
-                        return tTempah >= hariIni;
+                        let tTempah = parsingTarikhGAS(b.Tarikh_Mula);
+                        return tTempah && tTempah >= hariIni;
                     }).sort((a, b) => {
-                        const parseDate = (val) => {
-                            if (val instanceof Date) return val.getTime();
-                            let bersih = String(val).split('T')[0];
-                            if (bersih.includes('-')) { let p = bersih.split('-'); return new Date(p[0], p[1]-1, p[2]).getTime(); }
-                            if (bersih.includes('/')) { let p = bersih.split('/'); return p[2].length === 4 ? new Date(p[2], p[1]-1, p[0]).getTime() : new Date(p[0], p[1]-1, p[2]).getTime(); }
-                            return new Date(bersih).getTime();
-                        };
-                        return parseDate(a.Tarikh_Mula) - parseDate(b.Tarikh_Mula);
+                        let tA = parsingTarikhGAS(a.Tarikh_Mula);
+                        let tB = parsingTarikhGAS(b.Tarikh_Mula);
+                        return (tA ? tA.getTime() : 0) - (tB ? tB.getTime() : 0);
                     }) : [];
 
                 const adaHariIni = semuaUpcoming.find(b => {
-                    let tRaw = b.Tarikh_Mula; let tTempah;
-                    if (tRaw instanceof Date) { tTempah = new Date(tRaw.getFullYear(), tRaw.getMonth(), tRaw.getDate()); } 
-                    else {
-                        let bersih = String(tRaw).split('T')[0];
-                        if (bersih.includes('-')) { let p = bersih.split('-'); tTempah = new Date(p[0], p[1] - 1, p[2]); }
-                        else if (bersih.includes('/')) { let p = bersih.split('/'); tTempah = p[2].length === 4 ? new Date(p[2], p[1] - 1, p[0]) : new Date(p[0], p[1] - 1, p[2]); }
-                        else { let tObj = new Date(bersih); tTempah = new Date(tObj.getFullYear(), tObj.getMonth(), tObj.getDate()); }
-                    }
-                    tTempah.setHours(0, 0, 0, 0);
-                    return tTempah.getTime() === hariIni.getTime();
+                    let tTempah = parsingTarikhGAS(b.Tarikh_Mula);
+                    return tTempah && tTempah.getTime() === hariIni.getTime();
                 });
 
                 let bahagianStatusHTML = "";
@@ -361,9 +350,11 @@
                 } else {
                     const senaraiDigabung = [];
                     semuaUpcoming.forEach(b => {
-                        const tarikhStr = formatKeDDMM(b.Tarikh_Mula);
+                        let tObj = parsingTarikhGAS(b.Tarikh_Mula);
+                        if (!tObj) return;
+                        let tarikhStr = tObj.toLocaleDateString('ms-MY', {day:'2-digit', month:'2-digit'});
                         const namaBersih = b.Nama_Program ? b.Nama_Program.trim() : "";
-                        if (!tarikhStr) return;
+                        
                         const wujud = senaraiDigabung.find(item => item.Nama_Program.trim() === namaBersih);
                         if (wujud) { if (!wujud.tarikhList.includes(tarikhStr)) { wujud.tarikhList.push(tarikhStr); } } 
                         else { senaraiDigabung.push({ Nama_Program: namaBersih, tarikhList: [tarikhStr] }); }
@@ -456,8 +447,9 @@
                 ['Slot 1: 08:00 - 10:00', 'Slot 2: 10:00 - 12:00', 'Slot 3: 13:00 - 15:00', 'Slot 4: 15:00 - 17:00'].forEach(s => {
                     let pill = document.createElement('div');
                     let isAlreadyBooked = allBookings.some(b => {
-                        let checkDate = b.Tarikh_Mula;
-                        if (checkDate.includes('T')) { checkDate = new Date(checkDate).toLocaleDateString('ms-MY', {day:'2-digit', month:'2-digit', year:'numeric'}); }
+                        let tObj = parsingTarikhGAS(b.Tarikh_Mula);
+                        if (!tObj) return false;
+                        let checkDate = tObj.toLocaleDateString('ms-MY', {day:'2-digit', month:'2-digit', year:'numeric'});
                         return b.Fasiliti === namaFasilitiSemasa && checkDate === formattedDateForCheck && b.Slot === s;
                     });
 
@@ -595,17 +587,15 @@
             const hariIni = new Date(); hariIni.setHours(0, 0, 0, 0);
             let list = allBookings.filter(b => {
                 if (b.Fasiliti !== namaBilik) return false;
-                let cleanDate = b.Tarikh_Mula; let tarikhTempahan;
-                if (cleanDate.includes('T')) { tarikhTempahan = new Date(cleanDate); } 
-                else { tarikhTempahan = new Date(cleanDate.split('/').reverse().join('-')); }
-                tarikhTempahan.setHours(0, 0, 0, 0);
-                return tarikhTempahan >= hariIni;
+                let tTempah = parsingTarikhGAS(b.Tarikh_Mula);
+                return tTempah && tTempah >= hariIni;
             });
             
             let groupedBookings = {};
             list.forEach(b => {
-                let cleanDate = b.Tarikh_Mula;
-                if (cleanDate.includes('T')) { cleanDate = new Date(cleanDate).toLocaleDateString('ms-MY'); }
+                let tObj = parsingTarikhGAS(b.Tarikh_Mula);
+                if (!tObj) return;
+                let cleanDate = tObj.toLocaleDateString('ms-MY');
                 let key = `${cleanDate}_${b.Nama_Program}`;
                 if (!groupedBookings[key]) {
                     groupedBookings[key] = { Tarikh: cleanDate, Nama_Program: b.Nama_Program, Nama_Pemohon: b.Nama_Pemohon, No_HP: b.No_HP, Organisasi: b.Organisasi, Slots: [b.Slot] };
@@ -613,7 +603,9 @@
             });
 
             let finalList = Object.values(groupedBookings).sort((a, b) => {
-                return new Date(a.Tarikh.split('/').reverse().join('-')) - new Date(b.Tarikh.split('/').reverse().join('-'));
+                let pA = a.Tarikh.split('/').reverse().join('-');
+                let pB = b.Tarikh.split('/').reverse().join('-');
+                return new Date(pA) - new Date(pB);
             });
 
             content.innerHTML = finalList.length ? finalList.map(b => {
